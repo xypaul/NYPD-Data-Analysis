@@ -229,16 +229,21 @@ d3.csv("data.csv", function(error, data) {
 
 
 
-    //    var sankey = new d3.sankey();
-       //
-    //    sankey.stack(0,["Top","Bottom"]);
-    //    sankey.stack(1,["Merge"]);
-    //    sankey.stack(2,["Good","Bad"]);
-       //
-    //    sankey.setData([["Top",100,"Merge"],["Bottom",50,"Merge"],["Merge",70,"Good"],["Merge",80,"Bad"]]);
-    //    sankey.draw();
+    /////////////////////////
+    // Third Graph - Sankey
+    /////////////////////////
 
+    var raceCodes = {
+        "B": "Black",
+        "Q": "Latino",
+        "W": "White",
+        "A": "Asian",
+        "I": "I",
+        "P": "P",
+        "Z": "Z",
+        "U": "U"
 
+    }
     var arrest = { nodes: [], links: [] }
 
     arrest.nodes = [
@@ -250,21 +255,19 @@ d3.csv("data.csv", function(error, data) {
     // {"source":0,"target":3,"value":20}
     arrest.links = [];
 
-
     var race = d3.set();
     var connections = d3.map();
-
 
     for (var i =0; i < data.length; i++) {
         if(!race.has(data[i].race)){
             race.add(data[i].race);
         }
     }
+
     race = race.values();
     race.forEach(function(d, i){
-        arrest.nodes.push({"name": d})
+        arrest.nodes.push({"name": raceCodes[d]})
     })
-
 
     for (var i =0; i < data.length; i++) {
         var key = data[i].race + "-" + data[i].arstmade;
@@ -285,15 +288,6 @@ d3.csv("data.csv", function(error, data) {
         arrest.links.push(connections.get(i));
     })
 
-
-
-
-
-
-
-
-
-
     var svg3 = d3.select("body").append("svg")
         .attr("class", "graphics")
         .attr("width", width + margin.left + margin.right)
@@ -302,71 +296,147 @@ d3.csv("data.csv", function(error, data) {
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
    var sankey = d3.sankey()
-    .size([width, height])
-    .nodeWidth(15)
-    .nodePadding(10)
-    .nodes(arrest.nodes)
-    .links(arrest.links)
-    .layout(32);
+        .size([width, height])
+        .nodeWidth(15)
+        .nodePadding(10)
+        .nodes(arrest.nodes)
+        .links(arrest.links)
+        .layout(32);
 
 
 
     format = function(d) { return d; },
     color = d3.scale.category20();
 
-
     var path = sankey.link();
 
     var link = svg3.append("g").selectAll(".link")
-    .data(arrest.links)
-  .enter().append("path")
-    .attr("class", "link")
-    .attr("d", path)
-    .style("stroke-width", function(d) { return Math.max(1, d.dy); })
-    .sort(function(a, b) { return b.dy - a.dy; });
+        .data(arrest.links)
+      .enter().append("path")
+        .attr("class", "link")
+        .attr("d", path)
+        .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+        .sort(function(a, b) { return b.dy - a.dy; });
 
-link.append("title")
-    .text(function(d) { return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
+    link.append("title")
+        .text(function(d) { return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
 
-var node = svg3.append("g").selectAll(".node")
-    .data(arrest.nodes)
-  .enter().append("g")
-    .attr("class", "node")
-    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-  .call(d3.behavior.drag()
-    .origin(function(d) { return d; })
-    .on("dragstart", function() { this.parentNode.appendChild(this); })
-    .on("drag", dragmove));
+    var node = svg3.append("g").selectAll(".node")
+        .data(arrest.nodes)
+      .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+      .call(d3.behavior.drag()
+        .origin(function(d) { return d; })
+        .on("dragstart", function() { this.parentNode.appendChild(this); })
+        .on("drag", dragmove));
 
-node.append("rect")
-    .attr("height", function(d) { return d.dy; })
-    .attr("width", sankey.nodeWidth())
-    .style("fill", function(d) {
-        return d.color = color(d.name);
-    })
-    .style("stroke", function(d) {
-        return d3.rgb(d.color).darker(2);
-    })
-  .append("title")
-    .text(function(d) { return d.name + "\n" + format(d.value); });
+    node.append("rect")
+        .attr("height", function(d) { return d.dy; })
+        .attr("width", sankey.nodeWidth())
+        .style("fill", function(d) {
+            return d.color = color(d.name);
+        })
+        .style("stroke", function(d) {
+            return d3.rgb(d.color).darker(2);
+        })
+      .append("title")
+        .text(function(d) { return d.name + "\n" + format(d.value); });
 
-node.append("text")
-    .attr("x", -6)
-    .attr("y", function(d) { return d.dy / 2; })
-    .attr("dy", ".35em")
-    .attr("text-anchor", "end")
-    .attr("transform", null)
-    .text(function(d) { return d.name; })
-  .filter(function(d) { return d.x < width / 2; })
-    .attr("x", 6 + sankey.nodeWidth())
-    .attr("text-anchor", "start");
+    node.append("text")
+        .attr("x", -6)
+        .attr("y", function(d) { return d.dy / 2; })
+        .attr("dy", ".35em")
+        .attr("text-anchor", "end")
+        .attr("transform", null)
+        .text(function(d) { return d.name; })
+      .filter(function(d) { return d.x < width / 2; })
+        .attr("x", 6 + sankey.nodeWidth())
+        .attr("text-anchor", "start");
 
-function dragmove(d) {
-  d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
-  sankey.relayout();
-  link.attr("d", path);
-}
+    function dragmove(d) {
+      d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
+      sankey.relayout();
+      link.attr("d", path);
+    }
 
 
+    /////////////////////////
+    // Fourth graph
+    /////////////////////////
 
+    maleFemaleArrest = [
+        {
+            name: "Female",
+            amount: 0
+        },
+        {
+            name: "Male",
+            amount: 0
+        },
+        {
+            name: "Unspecified",
+            amount: 0
+        }
+    ];
+    for (var i =0; i < data.length; i++) {
+
+        if (data[i].arstmade == "Y") {
+            var temp = {}
+            if (data[i].sex == "M") {
+                temp = maleFemaleArrest[1];
+                temp.amount = temp.amount + 1;
+                maleFemaleArrest[1] = temp;
+            } else if (data[i].sex == "F") {
+                temp = maleFemaleArrest[0];
+                temp.amount = temp.amount + 1;
+                maleFemaleArrest[0] = temp;
+            } else {
+                temp = maleFemaleArrest[2];
+                temp.amount = temp.amount + 1;
+                maleFemaleArrest[2] = temp;
+            }
+        }
+    }
+
+    var radius = Math.min(width, height) / 2;
+    var color4 = d3.scale.ordinal()
+        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+    var arc = d3.svg.arc()
+        .outerRadius(radius - 10)
+        .innerRadius(0);
+
+    var labelArc = d3.svg.arc()
+        .outerRadius(radius - 40)
+        .innerRadius(radius - 40);
+
+    var pie = d3.layout.pie()
+        .sort(null)
+        .value(function(d) { return d.amount; });
+
+
+    var svg4 = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+      .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    var g4 = svg4.selectAll(".arc")
+        .data(pie(maleFemaleArrest))
+        .enter().append("g")
+          .attr("class", "arc");
+
+    g4.append("path")
+          .attr("d", arc)
+          .style("fill", function(d) {
+              return color4(d.data.amount);
+          });
+
+    g4.append("text")
+          .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
+          .attr("dy", ".35em")
+          .text(function(d) {
+              return d.data.name;
+          });
 })

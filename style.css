@@ -1,5 +1,10 @@
-.axis text {
-    font: 10px sans-serif;
+html {
+    font-family: "Futura Std";
+    font-weight: 300;
+}
+
+text {
+    font-size: 10px;
 }
 
 .axis line, path {
@@ -9,14 +14,14 @@
 }
 
 .bars rect {
-    fill: red;
+    fill: #67758E;
 }
 
 .notArrested {
-    fill: green;
+    fill: #2A333E;
 }
 .arrested {
-    fill: red;
+    fill: rgba(243, 0, 0, 0.6);
 }
 
 .blocks text {
@@ -24,7 +29,10 @@
 }
 
 
-
+.sankey text {
+    font-size: 12px;
+    font: 400;
+}
 
 .node rect {
   cursor: move;
@@ -50,10 +58,10 @@
 
 
 .arc text {
-  font: 10px sans-serif;
+    font-size: 14px;
   text-anchor: middle;
 }
 
 .arc path {
-  stroke: #fff;
+  stroke: rgba(255, 255, 255, 0.16);
 }

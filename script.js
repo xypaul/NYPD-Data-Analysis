@@ -212,6 +212,9 @@ d3.csv("data.csv", function(error, data) {
 
         var x2Axis = d3.svg.axis()
             .scale(x2)
+            .tickFormat(function(d){
+                return d + "h";
+            })
             .orient("bottom");
 
         svg2.append("g")
@@ -235,7 +238,7 @@ d3.csv("data.csv", function(error, data) {
 
     var raceCodes = {
         "B": "Black",
-        "Q": "Latino",
+        "Q": "Hispanic",
         "W": "White",
         "A": "Asian",
         "I": "I",
@@ -289,7 +292,7 @@ d3.csv("data.csv", function(error, data) {
     })
 
     var svg3 = d3.select("body").append("svg")
-        .attr("class", "graphics")
+        .attr("class", "sankey")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.left)
         .append("g")
@@ -375,7 +378,7 @@ d3.csv("data.csv", function(error, data) {
             amount: 0
         },
         {
-            name: "Unspecified",
+            name: "NA",
             amount: 0
         }
     ];
@@ -399,17 +402,17 @@ d3.csv("data.csv", function(error, data) {
         }
     }
 
-    var radius = Math.min(width, height) / 2;
+    var radius = Math.min(width-50, height-50) / 2;
     var color4 = d3.scale.ordinal()
-        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+        .range(["rgba(181, 0, 53, 0.7)", "rgba(14, 29, 97, 0.61)", "rgb(226, 207, 8)", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
     var arc = d3.svg.arc()
         .outerRadius(radius - 10)
         .innerRadius(0);
 
     var labelArc = d3.svg.arc()
-        .outerRadius(radius - 40)
-        .innerRadius(radius - 40);
+        .outerRadius(radius + 5)
+        .innerRadius(radius + 5);
 
     var pie = d3.layout.pie()
         .sort(null)
@@ -439,4 +442,150 @@ d3.csv("data.csv", function(error, data) {
           .text(function(d) {
               return d.data.name;
           });
+
+
+    /////////////////////////
+    // 5ith Graph - Arrest Graph
+    /////////////////////////
+
+    var forceUsed = [{
+            id: "pf_hands",
+            name: "Hands",
+            count: 0
+        },{
+            id: "pf_wall",
+            name: "Against wall",
+            count: 0
+        },{
+            id: "pf_grnd",
+            name: "On ground",
+            count: 0
+        },{
+            id: "pf_drwep",
+            name: "Weapon drawn",
+            count: 0
+        },{
+            id: "pf_ptwep",
+            name: "Weapon pointed",
+            count: 0
+        },{
+            id: "pf_baton",
+            name: "Baton",
+            count: 0
+        },{
+            id: "pf_hcuff",
+            name: "Handcuffs",
+            count: 0
+        },{
+            id: "pf_pepsp",
+            name: "Pepper Spray",
+            count: 0
+        },{
+            id: "pf_other",
+            name: "Other",
+            count: 0
+        }
+    ]
+
+    var typesOfForce= ["pf_hands", "pf_wall", "pf_grnd", "pf_drwep", "pf_ptwep", "pf_baton", "pf_hcuff", "pf_pepsp", "pf_other"];
+
+    var numberOfForceUsed = [0,0,0,0,0,0];
+
+    for (var i =0; i < data.length; i++) {
+        var tempCount = 0;
+        for (var j = 0; j < typesOfForce.length; j++) {
+            if (data[i][typesOfForce[j]] == "Y") {
+                forceUsed[j].count += 1;
+                tempCount++;
+            }
+        }
+        if (tempCount >= 5) {
+            numberOfForceUsed[5] += 1;
+        } else {
+            numberOfForceUsed[tempCount] += 1;
+        }
+
+    }
+
+    // Drawing graph
+    var y5 = d3.scale.linear()
+            .domain([0, d3.max(forceUsed, function(d){
+                return d.count;
+            })])
+            .range([height, 0])
+
+    var x5 = d3.scale.linear()
+            .domain([0,typesOfForce.length])
+            .range([0, width])
+
+
+    var svg5 = d3.select("body").append("svg")
+        .attr("class", "typesOfForce")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.left)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var y5Axis = d3.svg.axis()
+        .scale(y5)
+        .ticks(8)
+        .orient("left");
+
+    svg5.append("g")
+        .attr("class", "y axis")
+        .call(y5Axis)
+
+    var x5Axis = d3.svg.axis()
+        .scale(x5)
+        .orient("bottom")
+        .innerTickSize(12)
+        .tickFormat(function(d) {
+            if (d < forceUsed.length) {
+                return forceUsed[d].name;
+            } else {
+                return "";
+            }
+        })
+
+
+
+    svg5.append("g")
+        .attr("class", "x axis")
+        .call(x5Axis)
+        .attr("transform", "translate(" + 0 + "," + height + ")")
+        .selectAll("text")
+            .attr("x", function(){
+                return x5(0.5);
+            })
+            .attr("y", 6)
+
+
+    var graphs5 = svg5.append("g")
+        .attr("class", "bars")
+
+    // function byMonth(){
+    graphs5.selectAll("rect")
+        .data(forceUsed)
+        .enter()
+        .append("rect")
+            .attr("x", function(d, i) {
+                return x5(1) * i;
+            })
+            .attr("y", function (d) {
+                return y5(d.count);
+            })
+            .attr("width", function(){
+                return x5(1);
+            })
+            .attr("height", function (d) {
+                return height-y5(d.count);
+            })
+            .on('click', function(d){
+                console.log(d.count);
+            })
+
+
+
+
+
 })

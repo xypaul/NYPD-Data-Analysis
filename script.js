@@ -8,6 +8,23 @@ for (var i = 0; i < 24; i++) {
     byHour[i] = {arrested: 0, notArrested: 0};
 }
 
+
+function addTitle(svg, title, width) {
+
+    svg.append("text")
+        .attr("class", "title")
+        .text(title)
+        .attr("text-anchor","middle")
+        .attr("x", function(){
+                return width/2;
+        })
+        .attr("y", function(){
+            return -20;
+        })
+
+
+}
+
 d3.csv("data.csv", function(error, data) {
 
     /////////////////////////
@@ -76,6 +93,7 @@ d3.csv("data.csv", function(error, data) {
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    addTitle(svg, "Number of Stops per Month", width);
 
     var y = d3.scale.linear()
         .domain([0, d3.max(byMonth)])
@@ -157,6 +175,8 @@ d3.csv("data.csv", function(error, data) {
         .attr("height", height + margin.top + margin.left)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    addTitle(svg2, "Crime count per hour of day", width);
 
     var graphs2 = svg2.append("g")
         .attr("class", "bars2")
@@ -298,6 +318,8 @@ d3.csv("data.csv", function(error, data) {
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    addTitle(svg3, "Sankey - Arrest rate by Race", width);
+
    var sankey = d3.sankey()
         .size([width, height])
         .nodeWidth(15)
@@ -422,8 +444,11 @@ d3.csv("data.csv", function(error, data) {
     var svg4 = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
+        .attr("class", "pie")
       .append("g")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    addTitle(svg4, "Arrests by gender", width);
 
     var g4 = svg4.selectAll(".arc")
         .data(pie(maleFemaleArrest))
@@ -526,6 +551,8 @@ d3.csv("data.csv", function(error, data) {
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    addTitle(svg5, "Types of force used by NYPD", width);
+
     var y5Axis = d3.svg.axis()
         .scale(y5)
         .ticks(8)
@@ -583,6 +610,249 @@ d3.csv("data.csv", function(error, data) {
             .on('click', function(d){
                 console.log(d.count);
             })
+
+
+    /////////////////////////
+    // 6th Graph - Arrest Graph
+    /////////////////////////
+    var svg6 = d3.select("body").append("svg")
+        .attr("class", "typesOfForce")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.left)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    addTitle(svg6, "Number of force types used", width);
+
+    var graphs6 = svg6.append("g")
+        .attr("class", "bars")
+
+    var y6 = d3.scale.linear()
+            .domain([0, d3.max(numberOfForceUsed)])
+            .range([height, 0])
+
+    var y6Axis = d3.svg.axis()
+        .scale(y6)
+        .ticks(8)
+        .orient("left");
+
+    svg6.append("g")
+        .attr("class", "y axis")
+        .call(y6Axis)
+
+    var x6 = d3.scale.linear()
+            .domain([0,numberOfForceUsed.length])
+            .range([0, width])
+
+    var x6Axis = d3.svg.axis()
+        .scale(x6)
+        .orient("bottom")
+        .ticks(numberOfForceUsed.length)
+
+    svg6.append("g")
+        .attr("class", "x axis")
+        .call(x6Axis)
+        .attr("transform", "translate(" + 0 + "," + height + ")")
+        .selectAll("text")
+            .attr("x", function(){
+                return x6(0.5);
+            })
+            .attr("y", 6)
+
+    graphs6.selectAll("rect")
+        .data(numberOfForceUsed)
+        .enter()
+        .append("rect")
+            .attr("x", function(d, i) {
+                return (x6(1)/6)+(x6(1)*i);
+            })
+            .attr("y", function (d) {
+                return y6(d);
+            })
+            .attr("width", function(){
+                return (2*x6(1)/3);
+            })
+            .attr("height", function (d) {
+                return height-y6(d);
+            })
+
+    /////////////////////////
+    // 7th Graph - Inside our outside
+    /////////////////////////
+
+    var insideOutside = [[0,0],[0,0]];
+    for (var i =0; i < data.length; i++) {
+        var key = (data[i].inout == "O")? 1 : 0;
+
+        if (data[i].arstmade == "Y") {
+            insideOutside[key][0] += 1;
+        } else {
+            insideOutside[key][1] += 1;
+        }
+
+    }
+
+
+    var svg7 = d3.select("body").append("svg")
+        .attr("class", "insideOutside")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.left)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    addTitle(svg7, "Comparing stops inside vs outside", width);
+
+
+    var y7 = d3.scale.linear()
+            .domain([0, d3.max(insideOutside, function(a){
+                return d3.max(a)
+            })])
+            .range([height, 0])
+
+    var y7Axis = d3.svg.axis()
+        .scale(y7)
+        .ticks(8)
+        .orient("left");
+
+    svg7.append("g")
+        .attr("class", "y axis")
+        .call(y7Axis)
+
+    var x7 = d3.scale.linear()
+            .domain([0,4])
+            .range([0, width])
+
+    var x7Axis = d3.svg.axis()
+        .scale(x7)
+        .orient("bottom")
+        .ticks(0)
+
+    svg7.append("g")
+        .attr("class", "x axis")
+        .call(x7Axis)
+        .attr("transform", "translate(" + 0 + "," + height + ")")
+
+
+    var graphs7 = svg7.append("g")
+        .attr('class', 'bars')
+
+    var group7 = graphs7.selectAll('g.group')
+        .data(insideOutside)
+        .enter()
+            .append("g")
+                .attr('class', 'group')
+                .attr("transform", function(d,i){
+                    return "translate(" + x7(i*1.5) + "," + 0 + ")";
+                })
+
+
+    group7.append("text")
+            .attr("x", function(){
+                return x7(1);
+            })
+            .attr("y", function(){
+                return height + 20;
+            })
+            .attr("text-anchor","middle")
+            .text(function(d,i){
+                if (i == 0) {
+                    return "Stopped inside";
+                } else {
+                    return "Stopped outside";
+                }
+            })
+
+    group7.selectAll("rect.arrested")
+        .data(function(d){
+            return [d[0]];
+        })
+        .enter()
+            .append("rect")
+                .attr('class', 'arrested')
+                .attr("x", function(d, i) {
+                    return x7(0.5);
+                })
+                .attr("y", function (d) {
+                    return y7(d);
+                })
+                .attr("width", function(){
+                    return x7(0.5);
+                })
+                .attr("height", function (d) {
+                    return height - y7(d);
+                })
+
+        group7.selectAll("rect.notArrested")
+            .data(function(d){
+                return [d[1]];
+            })
+            .enter()
+                .append("rect")
+                    .attr('class', 'notArrested')
+                    .attr("x", function(d, i) {
+                        return x7(1);
+                    })
+                    .attr("y", function (d) {
+                        return y7(d);
+                    })
+                    .attr("width", function(){
+                        return x7(0.5);
+                    })
+                    .attr("height", function (d) {
+                        return height - y7(d);
+                    })
+
+        var legendInfo = [{
+                cla: "arrested",
+                label: "Arrested"
+            },{
+                cla: "notArrested",
+                label: "Not arrested"
+            }];
+
+
+        var legend = svg7.append("g")
+            .attr("attr", "legend")
+            .attr("transform", function(d, i){
+                return "translate(" + (width - 100) + "," + 80 + ")";
+            })
+
+        var legendItem = legend.selectAll("g.legend-item")
+            .data(legendInfo)
+            .enter()
+                .append("g")
+                    .attr('class', 'legend-item')
+                    .attr("transform", function(d, i){
+                        return "translate(" + 0 + "," + 20 * i + ")";
+                    })
+
+        legendItem.selectAll("rect")
+            .data(function(d){
+                return [d.cla];
+            })
+            .enter().append("rect")
+                .attr("class", function(d){
+                    return d;
+                })
+                .attr("width", 20)
+                .attr("height", 20)
+                .attr("x", 0)
+                .attr("y", 0)
+
+        legendItem.selectAll("text")
+            .data(function(d){
+                return [d.label];
+            })
+            .enter().append("text")
+                .attr("x", 30)
+                .attr("y", 12)
+                .text(function(d){
+                    return d;
+                })
+
+
+
+
 
 
 

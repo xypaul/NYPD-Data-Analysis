@@ -58,10 +58,49 @@ text {
 
 
 .arc text {
-    font-size: 14px;
-  text-anchor: middle;
+    font-size: 12px;
+    text-anchor: middle;
 }
 
 .arc path {
   stroke: rgba(255, 255, 255, 0.16);
+}
+
+
+svg {
+    border-bottom: 1px solid #DEDEDE;
+    padding-bottom: 50px;
+    padding-top: 50px;
+
+    margin: 0 auto;
+    display: block;
+}
+
+.pie text.title {
+    text-anchor: end;
+}
+
+
+
+h1 {
+    text-align: center;
+    margin-top: 46px;
+    margin-bottom: 0;
+    color: #2F2F2F;
+}
+
+html {
+    background: #F3F3F3;
+}
+
+text.title {
+    font-size: 11px;
+}
+
+.insideOutside .arrested {
+    fill: rgba(183, 45, 45, 0.95);
+}
+
+.insideOutside .notArrested {
+    fill: rgba(36, 34, 51, 0.6);
 }

@@ -849,4 +849,8 @@ d3.csv("data.csv", function(error, data) {
     .text(function(d){
         return d;
     })
+
+
+    // Remove loading screen
+    d3.selectAll(".loading").remove()
 })
